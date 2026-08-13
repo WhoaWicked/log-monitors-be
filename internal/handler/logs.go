@@ -113,8 +113,11 @@ func (s *Server) ListLogs(c *gin.Context) {
 	conditions := `WHERE 1=1`
 	args := make([]any, 0)
 	if service != "" {
-		args = append(args, service)
-		conditions += fmt.Sprintf(" AND service = $%d", len(args))
+		// ใช้ %s หรือ %v ก็ได้
+		serviceArg := fmt.Sprintf("%%%s%%", service)
+		// ถ้า service = "auth" จะได้ผลลัพธ์เป็น "%auth%"
+		args = append(args, serviceArg)
+		conditions += fmt.Sprintf(" AND service ILIKE $%d", len(args))
 	}
 	if level != "" {
 		args = append(args, level)
