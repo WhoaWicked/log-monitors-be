@@ -2,6 +2,7 @@ package handler
 
 import (
 	"log"
+	"log-monitors/internal/auth"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -13,6 +14,12 @@ var upgrader = websocket.Upgrader{
 }
 
 func (s *Server) WebsocketHandler(c *gin.Context) {
+	token := c.Query("token")
+	_, err := auth.VerifyToken(token, []byte(s.cfg.JWT.Secret))
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
+		return
+	}
 	conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {
 		log.Printf("websocket upgrade failed: %v", err)

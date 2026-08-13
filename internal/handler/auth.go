@@ -24,7 +24,7 @@ func (s *Server) Login(c *gin.Context) {
 	ctx, cancel := context.WithTimeout(c.Request.Context(), 5*time.Second)
 	defer cancel()
 	user := new(models.User)
-	query := "SELECT * FROM users WHERE email = $1;"
+	query := "SELECT id, password_hash FROM users WHERE email = $1;"
 	if err := s.db.GetContext(ctx, user, query, req.Email); err != nil {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid email or password"})
 		return

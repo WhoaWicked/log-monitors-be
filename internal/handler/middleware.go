@@ -12,7 +12,7 @@ func (s *Server) JwtAuth() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		token := strings.TrimPrefix(c.Request.Header.Get("Authorization"), "Bearer ")
 		if token == "" {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "not authorized"})
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "unauthorized"})
 			return
 		}
 		result, err := auth.VerifyToken(token, []byte(s.cfg.JWT.Secret))

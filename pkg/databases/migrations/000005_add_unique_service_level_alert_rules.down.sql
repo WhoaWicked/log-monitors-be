@@ -1,0 +1,5 @@
+BEGIN;
+
+ALTER TABLE alert_rules DROP CONSTRAINT unique_service_level;
+
+COMMIT;
