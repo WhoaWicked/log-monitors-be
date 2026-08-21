@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"log-monitors/internal/config"
+	"time"
 
 	_ "github.com/jackc/pgx/v5/stdlib"
 	"github.com/jmoiron/sqlx"
@@ -20,5 +21,8 @@ func Connect(cfg config.DBConfig) *sqlx.DB {
 	if err := db.Ping(); err != nil {
 		log.Fatalf("ping db failed: %v\n", err)
 	}
+	db.SetMaxOpenConns(25)
+	db.SetMaxIdleConns(25)
+	db.SetConnMaxIdleTime(time.Minute * 5)
 	return db
 }

@@ -8,6 +8,7 @@ import (
 	"log"
 	"log-monitors/internal/hub"
 	"log-monitors/internal/models"
+	"sync"
 	"time"
 
 	"github.com/jmoiron/sqlx"
@@ -19,6 +20,7 @@ type Ingest struct {
 	db    *sqlx.DB
 	redis *redis.Client
 	hub   *hub.Hub
+	wg    *sync.WaitGroup
 }
 
 type alertRuleCheck struct {
@@ -33,10 +35,12 @@ func NewIngest(db *sqlx.DB, redis *redis.Client, hub *hub.Hub) *Ingest {
 		db:    db,
 		redis: redis,
 		hub:   hub,
+		wg:    &sync.WaitGroup{},
 	}
 }
 
 func (i *Ingest) worker() {
+	defer i.wg.Done()
 	for job := range i.jobs {
 		insertCtx, insertCancel := context.WithTimeout(context.Background(), 3*time.Second)
 		var err error
@@ -91,7 +95,23 @@ func (i *Ingest) worker() {
 
 func (i *Ingest) Start(numWorkers int) {
 	for range numWorkers {
+		i.wg.Add(1)
 		go i.worker()
+	}
+}
+
+func (i *Ingest) Stop(ctx context.Context) {
+	close(i.jobs)
+	done := make(chan struct{})
+	go func() {
+		i.wg.Wait()
+		close(done)
+	}()
+	select {
+	case <-done:
+		log.Println("all worker finish gracefully")
+	case <-ctx.Done():
+		log.Println("shutdown timeout — some workers may still be running")
 	}
 }
 
