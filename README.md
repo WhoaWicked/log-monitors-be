@@ -34,7 +34,6 @@ Client → JwtAuth middleware → CreateLog handler
 ```
 
 ## Running locally
-## Running locally
 
 **Prerequisites:** Go 1.2x+, Docker, [golang-migrate](https://github.com/golang-migrate/migrate)
 
