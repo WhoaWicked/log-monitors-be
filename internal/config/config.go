@@ -8,9 +8,14 @@ import (
 )
 
 type Config struct {
+	App   AppConfig
 	DB    DBConfig
 	Redis RedisConfig
 	JWT   JWTConfig
+}
+
+type AppConfig struct {
+	Port int `env:"APP_PORT,required"`
 }
 
 type DBConfig struct {

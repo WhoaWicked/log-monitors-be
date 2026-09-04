@@ -31,8 +31,9 @@ func main() {
 	r := handler.SetupRouter(server)
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
+	port := fmt.Sprintf(":%d", cfg.App.Port)
 	srv := &http.Server{
-		Addr:    ":3000",
+		Addr:    port,
 		Handler: r,
 	}
 	go func() {
@@ -40,7 +41,7 @@ func main() {
 			log.Fatalf("server error: %v", err)
 		}
 	}()
-	log.Println("Server started on :3000")
+	log.Printf("Server started on %s\n", port)
 	<-ctx.Done()
 	log.Println("shutdown signal received, shutting down gracefully...")
 	shutdownCtx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
